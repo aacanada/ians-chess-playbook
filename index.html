@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1d2b3a">
+<title>Ian's Chess Playbook</title>
+<style>
+:root{
+  --bg:#13202d; --card:#1d2b3a; --card2:#243548; --ink:#eef3f8; --mute:#9fb0c2;
+  --accent:#ffb627; --good:#3ddc84; --bad:#ff5d5d; --light:#ecd8b4; --dark:#b07b4f;
+  --hl:rgba(255,182,39,.55); --last:rgba(120,200,255,.45);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px}
+.wrap{max-width:1000px;margin:0 auto;padding:14px 14px 40px}
+header{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}
+.logo{font-weight:800;font-size:22px;letter-spacing:.3px;cursor:pointer}
+.logo span{color:var(--accent)}
+.stats{display:flex;gap:8px;font-size:13px}
+.pill{background:var(--card2);padding:6px 10px;border-radius:999px;white-space:nowrap}
+.hidden{display:none!important}
+
+/* home */
+.hero{background:linear-gradient(135deg,#25405c,#1d2b3a);border-radius:18px;padding:18px;margin-bottom:14px}
+.hero h1{margin:0 0 6px;font-size:22px}
+.hero p{margin:0 0 12px;color:var(--mute)}
+.bigbtns{display:flex;gap:10px;flex-wrap:wrap}
+.btn{background:var(--card2);color:var(--ink);padding:11px 16px;font-weight:700}
+.btn.primary{background:var(--accent);color:#1b1b1b}
+.btn.good{background:var(--good);color:#0b2716}
+.btn:disabled{opacity:.4;cursor:default}
+.cat{margin:18px 0 8px;font-size:15px;text-transform:uppercase;letter-spacing:1px;color:var(--accent);font-weight:800}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.card{background:var(--card);border-radius:14px;padding:14px;cursor:pointer;border:2px solid transparent;transition:transform .12s}
+.card:hover{transform:translateY(-2px);border-color:#34506d}
+.card h3{margin:0 0 4px;font-size:16px}
+.card p{margin:0;color:var(--mute);font-size:13px;line-height:1.35}
+.card .meta{margin-top:8px;font-size:12px;color:var(--mute);display:flex;justify-content:space-between}
+.done{color:var(--good);font-weight:700}
+
+/* lesson */
+.lesson{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+@media (max-width:760px){.lesson{grid-template-columns:1fr}}
+.boardwrap{position:relative;width:100%;max-width:480px;margin:0 auto}
+.board{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));grid-template-rows:repeat(8,minmax(0,1fr));aspect-ratio:1/1;width:100%;border-radius:8px;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.35);touch-action:manipulation}
+.sq{position:relative;min-width:0;min-height:0;overflow:hidden;display:flex;align-items:center;justify-content:center;user-select:none}
+.sq.l{background:var(--light)} .sq.d{background:var(--dark)}
+.sq.last::after{content:"";position:absolute;inset:0;background:var(--last)}
+.sq.hl::after{content:"";position:absolute;inset:0;background:var(--hl)}
+.sq.sel::after{content:"";position:absolute;inset:0;background:rgba(61,220,132,.5)}
+.sq.tgt::before{content:"";position:absolute;width:30%;height:30%;border-radius:50%;background:rgba(0,0,0,.25);z-index:2}
+.sq.check::after{content:"";position:absolute;inset:0;background:radial-gradient(circle,rgba(255,60,60,.9) 0%,rgba(255,60,60,0) 70%)}
+.pc{position:relative;z-index:3;font-size:min(9vw,48px);line-height:1;transition:transform .15s}
+.pc.w{color:#fff;text-shadow:0 0 2px #000,0 0 1px #000,1px 1px 0 #000,-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000}
+.pc.b{color:#161616;text-shadow:0 0 1px #fff3}
+.coord{position:absolute;font-size:10px;font-weight:700;opacity:.7;z-index:1}
+.coord.f{right:3px;bottom:1px} .coord.r{left:3px;top:1px}
+.sq.l .coord{color:var(--dark)} .sq.d .coord{color:var(--light)}
+.panel{background:var(--card);border-radius:16px;padding:16px}
+.tag{display:inline-block;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--accent)}
+.panel h2{margin:4px 0 6px;font-size:21px}
+.bigidea{background:var(--card2);border-left:4px solid var(--accent);padding:10px 12px;border-radius:8px;font-weight:600;margin:8px 0}
+.ideas{margin:8px 0;padding-left:18px;color:var(--mute);font-size:14px;line-height:1.45}
+.caption{min-height:66px;background:#0f1924;border-radius:10px;padding:10px 12px;margin:10px 0;font-size:15px;line-height:1.4}
+.caption b{color:var(--accent)}
+.controls{display:flex;gap:8px;flex-wrap:wrap}
+.controls .btn{padding:9px 12px}
+.progress{height:6px;background:#0f1924;border-radius:9px;overflow:hidden;margin:8px 0}
+.progress>div{height:100%;background:var(--accent);width:0;transition:width .3s}
+.moves{font-size:13px;color:var(--mute);margin-top:8px;line-height:1.6}
+.moves span.cur{color:var(--ink);background:#34506d;border-radius:4px;padding:0 3px}
+.feedback{font-weight:800;font-size:17px;min-height:24px;margin:6px 0}
+.feedback.ok{color:var(--good)} .feedback.no{color:var(--bad)}
+.banner{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.6);opacity:0;background:rgba(0,0,0,.78);padding:14px 22px;border-radius:14px;font-size:26px;font-weight:900;z-index:20;pointer-events:none;transition:all .25s;white-space:nowrap}
+.banner.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.timer{height:8px;background:#0f1924;border-radius:9px;overflow:hidden;margin:6px 0}
+.timer>div{height:100%;background:var(--good);width:100%}
+.shake{animation:shake .35s}
+@keyframes shake{20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.small{font-size:12px;color:var(--mute)}
+.speedrow{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:800}
+.promo{position:absolute;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;gap:8px;z-index:30;border-radius:8px}
+.promo button{font-size:40px;width:64px;height:64px;background:var(--light)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo" id="logo">Ian's Chess <span>Playbook</span></div>
+    <div class="stats">
+      <div class="pill" title="Lessons finished">📘 <b id="stLessons">0</b></div>
+      <div class="pill" title="Puzzles solved">⚡ <b id="stXP">0</b> XP</div>
+      <div class="pill" title="Best speed-drill streak">🔥 <b id="stBest">0</b></div>
+    </div>
+  </header>
+
+  <!-- HOME -->
+  <section id="home">
+    <div class="hero">
+      <h1>Learn one big idea in 90 seconds.</h1>
+      <p>Watch the idea play out fast, then prove it with your own move. Short, quick, no fluff.</p>
+      <div class="bigbtns">
+        <button class="btn primary" id="btnNext">▶ Continue: next lesson</button>
+        <button class="btn" id="btnSpeed">⚡ Speed Drill (20 puzzles, 30s each)</button>
+        <button class="btn" id="btnGym">🏋️ Puzzle Gym</button>
+      </div>
+      <p class="small" id="countLine" style="margin:12px 0 0"></p>
+    </div>
+    <div id="catalog"></div>
+  </section>
+
+  <!-- LESSON / DRILL -->
+  <section id="lessonView" class="hidden">
+    <div class="lesson">
+      <div>
+        <div class="boardwrap" id="boardwrap">
+          <div class="board" id="board"></div>
+          <div class="banner" id="banner"></div>
+        </div>
+        <div class="controls" style="justify-content:center;margin-top:10px" id="boardCtl">
+          <button class="btn" id="bFlip" title="Flip board">⇅ Flip</button>
+        </div>
+      </div>
+      <div class="panel" id="panel">
+        <span class="tag" id="lTag"></span>
+        <h2 id="lTitle"></h2>
+        <div class="bigidea" id="lIdea"></div>
+
+        <div id="watchBox">
+          <div class="progress"><div id="prog"></div></div>
+          <div class="caption" id="caption"></div>
+          <div class="controls">
+            <button class="btn" id="bPrev">◀</button>
+            <button class="btn primary" id="bPlay">▶ Play</button>
+            <button class="btn" id="bNext">▶|</button>
+            <button class="btn" id="bRestart">↺</button>
+            <select id="speedSel" class="btn" title="Playback speed">
+              <option value="1600">Normal</option>
+              <option value="1000" selected>Fast</option>
+              <option value="600">Turbo</option>
+            </select>
+          </div>
+          <div class="moves" id="moveList"></div>
+          <ul class="ideas" id="lIdeas"></ul>
+          <div class="controls" style="margin-top:10px">
+            <button class="btn good" id="bTry">🎯 Your turn</button>
+            <button class="btn" id="bPractice">🏋️ Practice</button>
+          </div>
+          <p class="small">Tip: tap any piece to try your own moves. ↺ brings the lesson back.</p>
+        </div>
+
+        <div id="quizBox" class="hidden">
+          <div class="caption" id="qPrompt"></div>
+          <div class="feedback" id="qFeedback"></div>
+          <div class="controls">
+            <button class="btn" id="bHint">💡 Hint</button>
+            <button class="btn" id="bShow">👀 Show answer</button>
+            <button class="btn" id="bRetry">↺ Retry</button>
+            <button class="btn primary hidden" id="bNextLesson">Next lesson ▶</button>
+            <button class="btn good hidden" id="bPractice2">🏋️ Practice more</button>
+          </div>
+          <div class="controls" style="margin-top:8px"><button class="btn" id="bBackWatch">◀ Back to lesson</button></div>
+        </div>
+
+        <div id="speedBox" class="hidden">
+          <div class="speedrow"><span id="spCount"></span><span>🔥 Streak <span id="spStreak">0</span></span></div>
+          <div class="timer" id="spTimerWrap"><div id="spTimer"></div></div>
+          <div class="caption" id="spPrompt"></div>
+          <div class="feedback" id="spFeedback"></div>
+          <div class="controls">
+            <button class="btn" id="spHint">💡 Hint</button>
+            <button class="btn" id="spShow">👀 Answer</button>
+            <button class="btn" id="spSkip">Next ▶</button>
+            <button class="btn" id="spQuit">Stop</button>
+          </div>
+        </div>
+
+        <div class="controls" style="margin-top:12px"><button class="btn" id="bHome">⌂ All lessons</button></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="puzzles.js"></script>
+<script>
+/* ===================== MINI CHESS ENGINE (rules only) ===================== */
+const FILES='abcdefgh';
+const sqName=i=>FILES[i&7]+(8-(i>>3));
+const sqIdx=n=>(8-parseInt(n[1]))*8+FILES.indexOf(n[0]);
+const colorOf=pc=>pc?(pc===pc.toUpperCase()?'w':'b'):null;
+const KN=[[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]];
+const KG=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+const RD=[[1,0],[-1,0],[0,1],[0,-1]], BD=[[1,1],[1,-1],[-1,1],[-1,-1]];
+
+function parseFEN(f){
+  const [b,t,c,e,h,fm]=f.trim().split(/\s+/);const board=[];
+  for(const ch of b){if(ch==='/')continue;if(/\d/.test(ch)){for(let k=0;k<+ch;k++)board.push(null);}else board.push(ch);}
+  if(board.length!==64)throw new Error('Bad FEN '+f);
+  return{board,turn:t||'w',castle:(!c||c==='-')?'':c,ep:(!e||e==='-')?-1:sqIdx(e),half:+(h||0),full:+(fm||1)};
+}
+function toFEN(p){
+  let s='';for(let r=0;r<8;r++){let n=0;for(let f=0;f<8;f++){const pc=p.board[r*8+f];if(!pc)n++;else{if(n){s+=n;n=0;}s+=pc;}}if(n)s+=n;if(r<7)s+='/';}
+  return `${s} ${p.turn} ${p.castle||'-'} ${p.ep<0?'-':sqName(p.ep)} ${p.half} ${p.full}`;
+}
+function attacked(p,sq,by){
+  const r=sq>>3,f=sq&7,B=p.board;
+  const dir=by==='w'?1:-1;
+  for(const df of[-1,1]){const rr=r+dir,ff=f+df;if(rr>=0&&rr<8&&ff>=0&&ff<8&&B[rr*8+ff]===(by==='w'?'P':'p'))return true;}
+  const N=by==='w'?'N':'n',K=by==='w'?'K':'k',R=by==='w'?'R':'r',Bi=by==='w'?'B':'b',Q=by==='w'?'Q':'q';
+  for(const[dr,df]of KN){const rr=r+dr,ff=f+df;if(rr>=0&&rr<8&&ff>=0&&ff<8&&B[rr*8+ff]===N)return true;}
+  for(const[dr,df]of KG){const rr=r+dr,ff=f+df;if(rr>=0&&rr<8&&ff>=0&&ff<8&&B[rr*8+ff]===K)return true;}
+  for(const[dr,df]of RD){let rr=r+dr,ff=f+df;while(rr>=0&&rr<8&&ff>=0&&ff<8){const pc=B[rr*8+ff];if(pc){if(pc===R||pc===Q)return true;break;}rr+=dr;ff+=df;}}
+  for(const[dr,df]of BD){let rr=r+dr,ff=f+df;while(rr>=0&&rr<8&&ff>=0&&ff<8){const pc=B[rr*8+ff];if(pc){if(pc===Bi||pc===Q)return true;break;}rr+=dr;ff+=df;}}
+  return false;
+}
+function kingSq(p,c){return p.board.indexOf(c==='w'?'K':'k');}
+function inCheck(p,c){const k=kingSq(p,c);return k>=0&&attacked(p,k,c==='w'?'b':'w');}
+function makeMove(p,m){
+  const n={board:p.board.slice(),turn:p.turn==='w'?'b':'w',castle:p.castle,ep:-1,half:p.half+1,full:p.full+(p.turn==='b'?1:0)};
+  const B=n.board,pc=B[m.from];
+  B[m.to]=m.promo?(p.turn==='w'?m.promo.toUpperCase():m.promo):pc;B[m.from]=null;
+  if(m.ep)B[(m.from>>3)*8+(m.to&7)]=null;
+  if(m.castle){const rf={g1:'h1',c1:'a1',g8:'h8',c8:'a8'}[sqName(m.to)],rt={g1:'f1',c1:'d1',g8:'f8',c8:'d8'}[sqName(m.to)];B[sqIdx(rt)]=B[sqIdx(rf)];B[sqIdx(rf)]=null;}
+  if(m.double)n.ep=(m.from+m.to)/2;
+  if(pc.toLowerCase()==='p'||m.captured)n.half=0;
+  let c=n.castle;
+  if(pc==='K')c=c.replace(/[KQ]/g,'');if(pc==='k')c=c.replace(/[kq]/g,'');
+  const strip=s=>{if(s===63)c=c.replace('K','');if(s===56)c=c.replace('Q','');if(s===7)c=c.replace('k','');if(s===0)c=c.replace('q','');};
+  strip(m.from);strip(m.to);n.castle=c;
+  return n;
+}
+function genMoves(p){
+  const us=p.turn,them=us==='w'?'b':'w',B=p.board,mv=[];
+  for(let s=0;s<64;s++){
+    const pc=B[s];if(!pc||colorOf(pc)!==us)continue;
+    const t=pc.toLowerCase(),r=s>>3,f=s&7;
+    const add=(to,x={})=>mv.push(Object.assign({from:s,to,piece:pc,captured:B[to]},x));
+    if(t==='p'){
+      const d=us==='w'?-1:1,r1=r+d,start=us==='w'?6:1,promoR=us==='w'?0:7;
+      if(r1>=0&&r1<8&&!B[r1*8+f]){
+        if(r1===promoR){for(const pr of'qrbn')add(r1*8+f,{promo:pr});}else add(r1*8+f);
+        if(r===start&&!B[(r+2*d)*8+f])add((r+2*d)*8+f,{double:true});
+      }
+      for(const df of[-1,1]){const ff=f+df;if(ff<0||ff>7||r1<0||r1>7)continue;const to=r1*8+ff,tp=B[to];
+        if(tp&&colorOf(tp)===them){if(r1===promoR){for(const pr of'qrbn')add(to,{promo:pr});}else add(to);}
+        else if(to===p.ep)add(to,{ep:true,captured:us==='w'?'p':'P'});}
+    }else if(t==='n'||t==='k'){
+      for(const[dr,df]of(t==='n'?KN:KG)){const rr=r+dr,ff=f+df;if(rr<0||rr>7||ff<0||ff>7)continue;const to=rr*8+ff,tp=B[to];if(!tp||colorOf(tp)===them)add(to);}
+      if(t==='k'){
+        const cs=p.castle;
+        if(us==='w'&&s===60){
+          if(cs.includes('K')&&B[63]==='R'&&!B[61]&&!B[62]&&!attacked(p,60,'b')&&!attacked(p,61,'b')&&!attacked(p,62,'b'))add(62,{castle:true});
+          if(cs.includes('Q')&&B[56]==='R'&&!B[59]&&!B[58]&&!B[57]&&!attacked(p,60,'b')&&!attacked(p,59,'b')&&!attacked(p,58,'b'))add(58,{castle:true});
+        }
+        if(us==='b'&&s===4){
+          if(cs.includes('k')&&B[7]==='r'&&!B[5]&&!B[6]&&!attacked(p,4,'w')&&!attacked(p,5,'w')&&!attacked(p,6,'w'))add(6,{castle:true});
+          if(cs.includes('q')&&B[0]==='r'&&!B[3]&&!B[2]&&!B[1]&&!attacked(p,4,'w')&&!attacked(p,3,'w')&&!attacked(p,2,'w'))add(2,{castle:true});
+        }
+      }
+    }else{
+      const dirs=t==='r'?RD:t==='b'?BD:RD.concat(BD);
+      for(const[dr,df]of dirs){let rr=r+dr,ff=f+df;while(rr>=0&&rr<8&&ff>=0&&ff<8){const to=rr*8+ff,tp=B[to];if(tp){if(colorOf(tp)===them)add(to);break;}add(to);rr+=dr;ff+=df;}}
+    }
+  }
+  return mv.filter(m=>!inCheck(makeMove(p,m),us));
+}
+function status(p){const ms=genMoves(p);if(ms.length)return inCheck(p,p.turn)?'check':'';return inCheck(p,p.turn)?'mate':'stalemate';}
+function toSAN(p,m){
+  let s;
+  if(m.castle)s=(m.to&7)===6?'O-O':'O-O-O';
+  else{
+    const t=m.piece.toUpperCase(),cap=!!m.captured;
+    if(t==='P'){s=(cap?FILES[m.from&7]+'x':'')+sqName(m.to)+(m.promo?'='+m.promo.toUpperCase():'');}
+    else{
+      const others=genMoves(p).filter(o=>o.piece===m.piece&&o.to===m.to&&o.from!==m.from);
+      let dis='';
+      if(others.length){const sf=others.some(o=>(o.from&7)===(m.from&7)),sr=others.some(o=>(o.from>>3)===(m.from>>3));
+        dis=!sf?FILES[m.from&7]:!sr?String(8-(m.from>>3)):sqName(m.from);}
+      s=t+dis+(cap?'x':'')+sqName(m.to);
+    }
+  }
+  const st=status(makeMove(p,m));
+  return s+(st==='mate'?'#':st==='check'?'+':'');
+}
+function findMove(p,uci){
+  const from=sqIdx(uci.slice(0,2)),to=sqIdx(uci.slice(2,4)),pr=uci[4]||null;
+  return genMoves(p).find(m=>m.from===from&&m.to===to&&(!m.promo||m.promo===(pr||'q')))||null;
+}
+const uciOf=m=>sqName(m.from)+sqName(m.to)+(m.promo||'');
+
+/* ===================== LESSONS ===================== */
+const START='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+const LESSONS=[
+/* ---------- OPENINGS ---------- */
+{id:'o1',cat:'Openings',title:'The 3 Opening Jobs',
+ idea:'Center. Develop. Castle. Do these three before anything fancy.',
+ ideas:['Put a pawn (or two) in the center: e4/d4 or e5/d5.','Knights before bishops, aimed at the center.','Castle early so your king is safe and your rooks connect.','Move each piece once if you can. Every tempo counts.'],
+ fen:START,
+ steps:[
+  ['e2e4','<b>Center!</b> The pawn grabs d5 and f5 and frees the bishop and queen.'],
+  ['e7e5','Black claims the center too.'],
+  ['g1f3','<b>Develop with a threat.</b> The knight hits e5.'],
+  ['b8c6','Black develops and defends e5 at the same time.'],
+  ['f1c4','The bishop aims at <b>f7</b>, the weakest square near Black\'s king.'],
+  ['f8c5','Black mirrors: bishop to c5 aims at f2.'],
+  ['e1g1','<b>Castle!</b> King safe, rook heading to the middle.'],
+  ['g8f6','Black develops the last minor piece.'],
+  ['d2d3','Solid: supports e4 and opens the c1 bishop.'],
+  ['d7d6','Same idea for Black.'],
+  ['c2c3','Prepares d3-d4 later to grab even more center.'],
+  ['e8g8','Both sides finished the 3 jobs. Now the real game starts.']],
+ quiz:{fromStep:4,prompt:'White to move. Develop a piece that helps the center (any good developing move works).',
+   solution:['f1c4'],alt:['f1b5','b1c3','d2d4'],hint:'A bishop or a knight. Which piece is still asleep on the kingside?'}},
+
+{id:'o2',cat:'Openings',title:'Don\'t Rush the Queen',
+ idea:'An early queen gets chased. Every time she runs, you develop with tempo.',
+ ideas:['Defend f7/f2 calmly: ...g6, ...Qe7 or ...Qf6.','Then develop with attacks on the queen.','A queen being kicked around = free moves for you.'],
+ fen:START,
+ steps:[
+  ['e2e4','Normal start.'],['e7e5','Normal reply.'],
+  ['d1h5','The queen comes out early, eyeing f7 and e5.'],
+  ['b8c6','Black defends e5 by developing.'],
+  ['f1c4','Now Qxf7 would be <b>checkmate</b>. Black must react.'],
+  ['g7g6','<b>Kick the queen!</b> The pawn blocks the h5-f7 line and attacks the queen.'],
+  ['h5f3','The queen runs and threatens f7 again.'],
+  ['g8f6','Black blocks with a developing move.'],
+  ['f3b3','The queen tries a third time (with the bishop behind it on f7).'],
+  ['d8e7','Calm defence of f7.'],
+  ['b1c3','White develops.'],
+  ['c6d4','<b>Boom.</b> The knight hits the queen AND c2. Black is already better.']],
+ quiz:{fromStep:5,flip:true,prompt:'Black to move. White threatens Qxf7#. Stop it!',
+   solution:['g7g6'],alt:['d8e7','d8f6'],hint:'Look at the f7 square. Block the line, or defend it with your queen.'}},
+
+{id:'o3',cat:'Openings',title:'f7: The Weak Spot (Fried Liver)',
+ idea:'At the start, f7/f2 is defended only by the king. Watch out!',
+ ideas:['Bc4 + Ng5 together point at f7.','After 4...d5 5.exd5, Black should play 5...Na5 (not ...Nxd5).','The Fried Liver sac drags the king into the open.'],
+ fen:START,
+ steps:[
+  ['e2e4',''],['e7e5',''],['g1f3',''],['b8c6',''],
+  ['f1c4','Bishop aims at f7.'],
+  ['g8f6','Two Knights Defence.'],
+  ['f3g5','<b>Double attack on f7</b>: knight + bishop.'],
+  ['d7d5','Black blocks the bishop with a pawn.'],
+  ['e4d5','White takes.'],
+  ['f6d5','<b>Mistake!</b> This knight is now a target. 5...Na5 was correct.'],
+  ['g5f7','<b>The Fried Liver sacrifice!</b> Knight takes f7, forking queen and rook.'],
+  ['e8f7','Black takes. The king is out of its castle.'],
+  ['d1f3','<b>Check</b>, and the d5 knight is pinned and attacked.'],
+  ['f7e6','The king has to protect d5 himself.'],
+  ['b1c3','More attackers on the pinned knight. White\'s attack is huge.']],
+ quiz:{fromStep:10,prompt:'White to move. Black just played 5...Nxd5. Hit the weak spot!',
+   solution:['g5f7','e8f7','d1f3'],alt:['d2d4'],hint:'Which black square is only defended by the king?'}},
+
+{id:'o4',cat:'Openings',title:'Legal\'s Trap',
+ idea:'Pins are not always real. Sometimes the queen can be given away for checkmate.',
+ ideas:['Bg4 "pins" the knight to the queen, not the king.','A pin to the queen can be broken if you get something bigger.','Minor pieces working together can mate.'],
+ fen:START,
+ steps:[
+  ['e2e4',''],['e7e5',''],['g1f3',''],['d7d6','Philidor setup.'],
+  ['f1c4',''],['c8g4','Black pins the knight to the queen.'],
+  ['b1c3',''],['g7g6','<b>A slow move.</b> Black ignores the center.'],
+  ['f3e5','<b>Breaking the pin!</b> The queen is left hanging on purpose.'],
+  ['g4d1','Black grabs the queen...'],
+  ['c4f7','Check! The bishop takes f7.'],
+  ['e8e7','The only move.'],
+  ['c3d5','<b>Checkmate</b> with three minor pieces. That is Legal\'s Mate.']],
+ quiz:{fromStep:10,prompt:'White to move. Black took your queen. Find the mate in 2!',
+   solution:['c4f7','e8e7','c3d5'],hint:'Start with a check on f7.'}},
+
+/* ---------- MIDDLEGAME ---------- */
+{id:'m1',cat:'Middlegame',title:'Knight Outposts',
+ idea:'A knight on a square no pawn can attack is a monster.',
+ ideas:['An outpost is a hole: no enemy pawn can ever kick you out.','Best if your own pawn protects it (here e4 protects d5).','Knights love the 5th and 6th ranks.'],
+ fen:'r4rk1/pp3ppp/3p4/4p3/4P3/2N5/PPP2PPP/R4RK1 w - - 0 1',
+ hl:['d5'],
+ steps:[
+  ['c3d5','<b>Nd5!</b> Black has no c- or e-pawn to chase it. The e4 pawn guards it.'],
+  ['a8c8','Black looks for play on the c-file.'],
+  ['c2c3','Close the door: the c-file is blocked and d4/b4 are covered.'],
+  ['g7g6','Black has no good plan. That is what an outpost does.'],
+  ['a1d1','Rooks join the knight. White is pressing for free.']],
+ quiz:{fen:'r4rk1/pp3ppp/3p4/4p3/4P3/4N3/PPP2PPP/R4RK1 w - - 0 1',prompt:'White to move. Put your knight on its dream square.',
+   solution:['e3d5'],hint:'Which square can no black pawn ever attack, and is protected by your e4 pawn?'}},
+
+{id:'m2',cat:'Middlegame',title:'Rooks: Open Files & the 7th',
+ idea:'Rooks want open files. A rook on the 7th rank eats pawns.',
+ ideas:['Put your rook on the file with no pawns first.','Reach the 7th rank (2nd for Black) to attack pawns from the side.','Give your king "luft" (h3) so there is no back-rank mate.'],
+ fen:'2r3k1/pp3ppp/8/8/8/7P/PP3PP1/3R2K1 w - - 0 1',
+ steps:[
+  ['d1d7','<b>Rook to the 7th!</b> It attacks b7 and keeps Black\'s king boxed in.'],
+  ['c8b8','Black must defend passively.'],
+  ['g1f1','Endgame time: the king walks to the center.'],
+  ['g8f8',''],
+  ['f1e2','White\'s king is active, Black\'s rook is stuck on b8.'],
+  ['f8e8','The black king attacks the rook.'],
+  ['d7c7','The rook just slides along and stays on the 7th. Black is tied up.']],
+ quiz:{fen:'3r2k1/pp3ppp/8/8/8/7P/PP3PP1/2R3K1 w - - 0 1',prompt:'White to move. Use the open file to invade.',
+   solution:['c1c7'],hint:'The c-file is wide open. How far can your rook go?'}},
+
+/* ---------- TACTICS ---------- */
+{id:'t1',cat:'Tactics',title:'The Fork',
+ idea:'One piece attacks two things at once. They can only save one.',
+ ideas:['Knights are the best forkers: they jump and can\'t be blocked.','Look for the king + something big on a knight-jump pattern.','A check-fork is the strongest because they must answer the check.'],
+ fen:'r3k3/5ppp/8/1N6/8/8/5PPP/6K1 w - - 0 1',hl:['c7'],
+ steps:[
+  ['b5c7','<b>Nc7+!</b> Check on the king, attack on the rook.'],
+  ['e8e7','The king has to move.'],
+  ['c7a8','Rook is gone. Free material.']],
+ quiz:{fen:'6k1/5ppp/2q5/3N4/8/8/5PPP/6K1 w - - 0 1',prompt:'White to move. Win the black queen.',
+   solution:['d5e7','g8h8','e7c6'],hint:'Find a knight check that also hits c6.'}},
+
+{id:'t2',cat:'Tactics',title:'The Pin',
+ idea:'A piece that can\'t move because something bigger is behind it.',
+ ideas:['Absolute pin: the king is behind. The piece cannot move off the line.','Attack a pinned piece again and again.','Bishops, rooks and queens pin. Knights can\'t.'],
+ fen:'4k3/pp3ppp/8/4q3/8/8/PP3PPP/3R1K2 w - - 0 1',hl:['e1','e5','e8'],
+ steps:[
+  ['d1e1','<b>Re1!</b> The queen is pinned to the king. She can\'t run.'],
+  ['e5e1','Best Black can do: give the queen for the rook.'],
+  ['f1e1','White wins queen for rook.']],
+ quiz:{fen:'4k3/pp1q1ppp/8/8/8/2N5/PP3PPP/5BK1 w - - 0 1',prompt:'White to move. Pin and win the queen.',
+   solution:['f1b5','d7b5','c3b5'],hint:'Line up a bishop with the queen AND the king.'}},
+
+{id:'t3',cat:'Tactics',title:'The Skewer',
+ idea:'A "reverse pin": attack the big piece in front, win the one behind.',
+ ideas:['Check the king; when it steps aside, take what was behind it.','King and queen on the same line = skewer alarm.','Rooks skewer on ranks and files, bishops on diagonals.'],
+ fen:'2q5/pp4pp/4k3/8/8/8/PP2BPPP/6K1 w - - 0 1',hl:['g4','e6','c8'],
+ steps:[
+  ['e2g4','<b>Bg4+!</b> King and queen are on the same diagonal.'],
+  ['e6d6','The king must step off the line.'],
+  ['g4c8','The queen behind it falls.']],
+ quiz:{fen:'8/3k3q/8/8/8/8/5PPP/R5K1 w - - 0 1',prompt:'White to move. Win the queen with a skewer.',
+   solution:['a1a7','d7e6','a7h7'],hint:'King and queen are both on the 7th rank.'}},
+
+{id:'t4',cat:'Tactics',title:'Discovered Attack',
+ idea:'Move one piece out of the way and the piece behind it attacks.',
+ ideas:['Two threats in one move: the piece that moves + the piece revealed.','Discovered CHECK is the most dangerous: they must handle the check first.','Look for your own pieces lined up behind each other.'],
+ fen:'4k3/pp3ppp/8/7q/4N3/8/PP3PPP/4R1K1 w - - 0 1',hl:['e1','e8'],
+ steps:[
+  ['e4g3','<b>Ng3+!</b> The rook gives check, and the knight attacks the queen.'],
+  ['e8d7','Black must escape the check.'],
+  ['g3h5','The queen is gone.']],
+ quiz:{fen:'3q2k1/5pp1/8/8/8/3B4/5PPP/3R2K1 w - - 0 1',prompt:'White to move. Your rook is hiding behind the bishop. Win the queen!',
+   solution:['d3h7','g8h7','d1d8'],hint:'Move the bishop WITH CHECK, so the rook is free to take.'}},
+
+{id:'t5',cat:'Tactics',title:'Back-Rank Mate',
+ idea:'A king trapped behind its own pawns dies to a rook or queen on the back rank.',
+ ideas:['Always check: can my opponent\'s king escape the back rank?','Remove the defenders of the back rank, then strike.','Protect yourself: play h3 (or ...h6) when you have time.'],
+ fen:'6k1/5ppp/8/r7/8/8/5PPP/3R2K1 w - - 0 1',hl:['d8'],
+ steps:[['d1d8','<b>Rd8#</b>. The black king is trapped by its own pawns.']],
+ quiz:{fen:'4r1k1/3q1ppp/8/8/8/8/4QPPP/4R1K1 w - - 0 1',anyMate:true,prompt:'White to move. Mate in 2: the back rank has only one defender.',
+   solution:['e2e8','d7e8','e1e8'],hint:'Sacrifice something big on e8 first.'}},
+
+{id:'t6',cat:'Tactics',title:'Smothered Mate',
+ idea:'A knight mates a king that is surrounded by its own pieces.',
+ ideas:['Classic picture: king in the corner, rook and pawns blocking it in.','Queen sacrifice on g8 forces the rook to smother its own king.','Knights love this pattern on f7/f2.'],
+ fen:'6rk/6pp/8/6N1/8/8/5PPP/6K1 w - - 0 1',hl:['f7'],
+ steps:[['g5f7','<b>Nf7#</b>. The king can\'t move: its own rook and pawns are in the way.']],
+ quiz:{fen:'r6k/6pp/7N/8/2Q5/8/5PPP/6K1 w - - 0 1',prompt:'White to move. Mate in 2 with a queen sacrifice!',
+   solution:['c4g8','a8g8','h6f7'],hint:'Put the queen on g8 where the black king can\'t take it.'}},
+
+/* ---------- ENDGAMES ---------- */
+{id:'e1',cat:'Endgames',title:'King in Front of the Pawn',
+ idea:'In pawn endgames the king is a fighter. Lead with the king, not the pawn.',
+ ideas:['King on the 6th rank in front of its pawn = win (not with a rook pawn).','Grab the key squares in front of the pawn.','Careful: pushing too early can give stalemate.'],
+ fen:'4k3/8/4K3/8/4P3/8/8/8 w - - 0 1',
+ steps:[
+  ['e4e5','The king is already on the 6th. Now the pawn comes up.'],
+  ['e8f8',''],
+  ['e6d7','<b>Kd7!</b> The king controls e7 and e8. The pawn walks home.'],
+  ['f8f7',''],
+  ['e5e6','Check.'],
+  ['f7f8',''],
+  ['e6e7','Check again.'],
+  ['f8f7',''],
+  ['e7e8q','New queen, protected by the king. Winning.']],
+ quiz:{fromStep:2,prompt:'White to move. Take control of the queening square.',
+   solution:['e6d7'],hint:'Use your king to cover e7 and e8.'}},
+
+{id:'e2',cat:'Endgames',title:'Rule of the Square',
+ idea:'Can the king catch the pawn? Draw a box. If the king can step in, it catches it.',
+ ideas:['Draw a square from the pawn to its queening square.','If the defending king can step inside (on its move), it catches the pawn.','No counting needed, just look at the box.'],
+ fen:'8/8/8/P3k3/8/8/8/7K b - - 0 1',hl:['a5','b5','c5','d5','a8','b8','c8','d8','a6','a7','d6','d7'],
+ steps:[
+  ['e5d5','Black steps into the square (a5 to d8).'],
+  ['a5a6','The box shrinks...'],
+  ['d5c6','...the king stays inside.'],
+  ['a6a7',''],
+  ['c6b7','Caught.'],
+  ['h1g2',''],
+  ['b7a7','Pawn gone. The square never lies.']],
+ quiz:{fen:'8/8/8/P3k3/8/8/8/7K w - - 0 1',prompt:'Same position, but now WHITE moves first. Win the race!',
+   solution:['a5a6'],hint:'Move first and make the box smaller before the king steps in.'}},
+
+{id:'e3',cat:'Endgames',title:'Lucena: Build a Bridge',
+ idea:'Rook + pawn on the 7th vs rook: block the checks with your rook on the 4th rank.',
+ ideas:['First cut the enemy king off with a check.','Rook to the 4th rank.','Walk your king out; when the checks come, block with the rook.'],
+ fen:'1K1k4/1P6/8/8/8/8/r7/2R5 w - - 0 1',
+ steps:[
+  ['c1d1','<b>Check!</b> Push the black king one file further away.'],
+  ['d8e7',''],
+  ['d1d4','<b>Rd4!</b> Building the bridge.'],
+  ['a2a1','Black waits.'],
+  ['b8c7','The king walks out.'],
+  ['a1c1','Checks begin.'],
+  ['c7b6',''],
+  ['c1b1',''],
+  ['b6c6',''],
+  ['b1c1',''],
+  ['c6b5',''],
+  ['c1b1',''],
+  ['d4b4','<b>The bridge!</b> No more checks, the pawn will queen.']],
+ quiz:{fromStep:2,prompt:'White to move. Get your rook ready to build the bridge.',
+   solution:['d1d4'],hint:'Which rank lets the rook block checks later?'}},
+
+{id:'e4',cat:'Endgames',title:'Queen Mate: The Edge',
+ idea:'Push the king to the edge, bring your king close, then mate on the edge.',
+ ideas:['Queen a knight\'s jump away from the king boxes it in.','Bring your king next to theirs.','Always check for stalemate before each move!'],
+ fen:'7k/8/6K1/8/8/8/8/1Q6 w - - 0 1',hl:['b8'],
+ steps:[['b1b8','<b>Qb8#</b>. The queen covers the edge, the king covers the escape squares.']],
+ quiz:{fen:'5k2/8/5K2/8/8/8/8/1Q6 w - - 0 1',anyMate:true,prompt:'White to move. Mate in 1.',
+   solution:['b1b8'],hint:'The king on f6 already guards e7, f7 and g7.'}},
+
+/* ---------- HABITS ---------- */
+{id:'h1',cat:'Thinking Habits',title:'Checks, Captures, Threats',
+ idea:'Before every move: Checks, Captures, Threats. For you AND for them.',
+ ideas:['1. What did my opponent\'s last move threaten?','2. Do I have a check, a capture or a threat?','3. Blunder check: after my move, what is their best check or capture?','In fast games, just do step 3. It saves the most games.'],
+ fen:'6k1/5ppp/8/8/8/8/1b3PPP/4R1K1 w - - 0 1',
+ steps:[['e1e8','Checks first! <b>Re8#</b>. Black forgot about the back rank.']],
+ quiz:{fen:'r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4',prompt:'White to move. Black just blundered with ...Nf6. Checks first!',
+   solution:['h5f7'],hint:'Look at f7. Which of your pieces attack it?'}}
+];
+/* extra hand-written opening lessons */
+const OPENINGS2=[
+{id:'o5',cat:'Openings',title:'Ruy Lopez (Spanish)',theme:'opening',
+ idea:'Attack the defender: hit the c6 knight so e5 gets weaker.',
+ ideas:['Bb5 pressures the knight that guards e5.','White castles fast and plays Re1, c3 and d4 later.','One of the oldest and most respected openings.'],
+ fen:START,
+ steps:[['e2e4',''],['e7e5',''],['g1f3','Hit e5.'],['b8c6','Defend e5.'],
+  ['f1b5','<b>The Spanish bishop.</b> It attacks the defender of e5.'],
+  ['a7a6','Black asks the bishop a question.'],['b5a4','Keep the pin-pressure.'],
+  ['g8f6','Black develops and hits e4.'],['e1g1','Castle first. e4 is safe for now.'],
+  ['f8e7',''],['f1e1','The rook protects e4 and eyes the e-file.'],
+  ['b7b5','Kick the bishop.'],['a4b3','The bishop now aims at f7.'],
+  ['d7d6',''],['c2c3','Getting ready for d4.'],['e8g8',''],['h2h3','Stops ...Bg4. A classic Ruy Lopez setup.']],
+ quiz:{fromStep:4,prompt:'White to move. Play the Spanish bishop move (or another good developing move).',solution:['f1b5'],alt:['f1c4','b1c3','d2d4'],hint:'Attack the knight that defends e5.'}},
+
+{id:'o6',cat:'Openings',title:'Queen\'s Gambit',
+ idea:'Offer the c-pawn to pull Black\'s d5 pawn away from the center.',
+ ideas:['c4 attacks d5 from the side.','If Black takes on c4, White builds a big center with e4.','Declining with ...e6 is solid but locks in the c8 bishop.'],
+ fen:START,
+ steps:[['d2d4','Center pawn.'],['d7d5','Black matches.'],['c2c4','<b>The Gambit.</b> Strike at d5 from the side.'],
+  ['e7e6','Queen\'s Gambit Declined: keep the center.'],['b1c3','More pressure on d5.'],['g8f6',''],
+  ['c1g5','Pin the knight that guards d5.'],['f8e7','Unpin.'],['e2e3',''],['e8g8','Black castles.'],
+  ['g1f3',''],['b8d7',''],['a1c1','The rook goes to the c-file, where the action will be.']],
+ quiz:{fromStep:2,prompt:'White to move. Play the gambit move!',solution:['c2c4'],hint:'Attack d5 with a wing pawn.'}},
+
+{id:'o7',cat:'Openings',title:'Sicilian Defence',
+ idea:'Black trades a wing pawn (c) for a center pawn (d): unbalanced and fighting.',
+ ideas:['1...c5 fights for d4 without copying White.','After ...cxd4, Black has two center pawns vs one.','White gets fast development; Black gets the half-open c-file.'],
+ fen:START,
+ steps:[['e2e4',''],['c7c5','<b>The Sicilian.</b> Fight for d4 from the side.'],['g1f3',''],['d7d6',''],
+  ['d2d4','Open the center.'],['c5d4','Wing pawn for center pawn.'],['f3d4',''],['g8f6','Hit e4.'],
+  ['b1c3','Defend e4 by developing.'],['a7a6','The Najdorf: a flexible little move.']],
+ quiz:{fromStep:4,prompt:'White to move. Open up the center.',solution:['d2d4'],hint:'Push a center pawn two squares.'}},
+
+{id:'o8',cat:'Openings',title:'French Defence: Attack the Chain',
+ idea:'Facing a pawn chain? Attack its base.',
+ ideas:['After e5, White\'s pawns form a chain: d4-e5.','Black hits the base (d4) with ...c5 and ...Nc6, ...Qb6.','The c8 bishop is the French\'s problem piece.'],
+ fen:START,
+ steps:[['e2e4',''],['e7e6','The French.'],['d2d4',''],['d7d5','Challenge e4.'],
+  ['e4e5','The Advance: White builds a chain.'],['c7c5','<b>Hit the base</b> of the chain!'],
+  ['c2c3','Support d4.'],['b8c6','More pressure on d4.'],['g1f3',''],
+  ['d8b6','Three black pieces on d4.'],['f1e2',''],['c5d4',''],['c3d4','The fight is all about d4.']],
+ quiz:{fromStep:5,prompt:'Black to move. White just built the d4-e5 chain. Attack it the right way.',solution:['c7c5'],hint:'Always attack the BASE of a pawn chain.'}},
+
+{id:'o9',cat:'Openings',title:'Caro-Kann: Bishop Out First',
+ idea:'Get the light-squared bishop out BEFORE playing ...e6.',
+ ideas:['...c6 supports ...d5 without blocking the bishop.','Bf5 develops the "problem bishop" early.','Solid and safe: a great choice against 1.e4.'],
+ fen:START,
+ steps:[['e2e4',''],['c7c6','The Caro-Kann.'],['d2d4',''],['d7d5',''],['b1c3',''],['d5e4',''],['c3e4',''],
+  ['c8f5','<b>Bishop out first!</b> Hit the knight.'],['e4g3','The knight attacks the bishop.'],['f5g6','Calm retreat.'],
+  ['h2h4','White tries to scare the bishop.'],['h7h6','Make a home on h7.'],['g1f3',''],['b8d7','Solid development.']],
+ quiz:{fromStep:7,prompt:'Black to move. Develop your best bishop before it gets locked in.',solution:['c8f5'],hint:'Which bishop gets trapped behind ...e6 later?'}},
+
+{id:'o10',cat:'Openings',title:'London System',
+ idea:'The same easy setup every game: d4, Bf4, e3, Nf3, c3, Bd3.',
+ ideas:['Get the c1 bishop out BEFORE e3.','A solid triangle: c3-d4-e3.','Great for saving time on theory.'],
+ fen:START,
+ steps:[['d2d4',''],['d7d5',''],['c1f4','<b>Bishop out first</b> before e3 locks it in.'],['g8f6',''],['e2e3',''],['e7e6',''],['g1f3',''],['c7c5',''],
+  ['c2c3','The pawn triangle c3-d4-e3.'],['b8c6',''],['b1d2',''],['f8d6','Black offers a bishop trade.'],
+  ['f4g3','Keep the bishop.'],['e8g8',''],['f1d3','Setup finished.']],
+ quiz:{fromStep:2,prompt:'White to move. Start the London the right way.',solution:['c1f4'],hint:'Get the dark-squared bishop out before e3.'}},
+
+{id:'o11',cat:'Openings',title:'King\'s Indian: Let Them, Then Strike',
+ idea:'Let White build a big center, then hit it with ...e5.',
+ ideas:['Fianchetto: ...g6 and ...Bg7 aim down the long diagonal.','Castle quickly.','Then strike the center with ...e5 (or ...c5).'],
+ fen:START,
+ steps:[['d2d4',''],['g8f6',''],['c2c4',''],['g7g6','Prepare the fianchetto.'],['b1c3',''],['f8g7','<b>The long-diagonal bishop.</b>'],
+  ['e2e4','White takes a big center.'],['d7d6',''],['g1f3',''],['e8g8','King safe first.'],['f1e2',''],
+  ['e7e5','<b>Strike!</b> Now the center is Black\'s too.'],['e1g1',''],['b8c6',''],['d4d5','The center locks.'],['c6e7','Next: ...f5 and attack on the kingside.']],
+ quiz:{fromStep:11,prompt:'Black to move. You castled. Now hit White\'s center.',solution:['e7e5'],alt:['c7c5'],hint:'A center pawn two squares forward.'}},
+
+{id:'o12',cat:'Openings',title:'Scandinavian: Develop with Tempo',
+ idea:'When their queen comes out early, develop and attack it at the same time.',
+ ideas:['After 2...Qxd5, Nc3 develops AND hits the queen.','Each attack on the queen is a free developing move.','For Black: put the queen on a safe square like a5 or d6.'],
+ fen:START,
+ steps:[['e2e4',''],['d7d5','The Scandinavian.'],['e4d5',''],['d8d5','The queen recaptures.'],
+  ['b1c3','<b>Develop with tempo!</b>'],['d5a5','The queen moves again.'],['d2d4',''],['g8f6',''],['g1f3',''],
+  ['c7c6','Gives the queen a retreat.'],['f1c4',''],['c8f5','A solid setup for Black.']],
+ quiz:{fromStep:4,prompt:'White to move. Black\'s queen is in the center. Punish it!',solution:['b1c3'],hint:'Develop a piece that attacks the queen.'}}
+];
+
+/* theme lessons built from real Lichess puzzles */
+const THEME_LESSONS=[
+{cat:'Tactics',theme:'doubleCheck',title:'Double Check',idea:'Two pieces give check at once. The king MUST move.',ideas:['You can\'t block or capture two checkers at once.','Usually comes from a discovered check where the moving piece also checks.','Often leads straight to mate.']},
+{cat:'Tactics',theme:'hangingPiece',title:'Free Pieces',idea:'Before anything clever: is something just hanging?',ideas:['Count attackers and defenders on every piece.','Most games below 1800 are decided by hanging pieces.','Also check: is MY piece hanging after this move?']},
+{cat:'Tactics',theme:'trappedPiece',title:'Trap a Piece',idea:'A piece with no safe squares can be hunted down.',ideas:['Bishops and knights on the edge are easy to trap.','Take away escape squares first, then attack.','Greedy pawn-grabbing queens get trapped too.']},
+{cat:'Tactics',theme:'capturingDefender',title:'Remove the Defender',idea:'Take the piece that guards something. Then grab it.',ideas:['Ask: what is holding the position together?','Capture or chase that defender.','The thing it was guarding falls.']},
+{cat:'Tactics',theme:'deflection',title:'Deflection',idea:'Force a defender to leave its job.',ideas:['A defender can only be in one place.','Attack it, or offer it something it must take.','Then hit what it was guarding.']},
+{cat:'Tactics',theme:'attraction',title:'Attraction (Decoy)',idea:'Lure a piece (often the king) onto a bad square.',ideas:['Sacrifice on the square you want the king to go to.','Then fork, check or mate it there.','Works great with knight forks.']},
+{cat:'Tactics',theme:'clearance',title:'Clearance',idea:'Move your own piece out of the way, even with a sacrifice.',ideas:['Sometimes your own piece blocks a line or a square.','Clear it with tempo (check or a big threat).','The line opens for a bigger piece.']},
+{cat:'Tactics',theme:'interference',title:'Interference',idea:'Put a piece between two enemy pieces that defend each other.',ideas:['Cut the line between a defender and what it defends.','The blocking piece is often a sacrifice.','Now one of them is undefended.']},
+{cat:'Tactics',theme:'xRayAttack',title:'X-Ray',idea:'A piece attacks THROUGH another piece.',ideas:['Rooks and queens on the same line support each other "through" enemy pieces.','After a trade on that line, the back piece wins.','Look for it on open files and long diagonals.']},
+{cat:'Tactics',theme:'intermezzo',title:'In-Between Move',idea:'Before recapturing, play a stronger move first.',ideas:['Don\'t auto-recapture. Look for a check or a bigger threat.','Zwischenzug is the German name.','It often wins extra material.']},
+{cat:'Tactics',theme:'sacrifice',title:'Sacrifice to Win',idea:'Give material to get something better: mate, more material, or a crushing attack.',ideas:['Calculate forcing moves: checks first.','A sacrifice must lead to something concrete.','If you can\'t see the payoff, don\'t sac.']},
+{cat:'Tactics',theme:'quietMove',title:'The Quiet Killer',idea:'Not every winning move is a check or capture.',ideas:['A calm move can create two threats at once.','Or take away the last escape square.','After checks and captures, look for quiet threats.']},
+{cat:'Tactics',theme:'defensiveMove',title:'Find the Defence',idea:'When you\'re under attack, find the only move that holds.',ideas:['First list what the opponent threatens.','Look for counter-attacks, not just passive defence.','Calm down: there is often one saving move.']},
+{cat:'Checkmates',theme:'mateIn1',title:'Mate in 1',idea:'Scan every check. One of them ends the game.',ideas:['Look at all checks first.','For each: can the king escape, block or capture?','Fast pattern training.']},
+{cat:'Checkmates',theme:'mateIn2',title:'Mate in 2',idea:'A check (or quiet move) that leaves only losing replies.',ideas:['Start with the most forcing move.','Predict their only reply.','Then find the final blow.']},
+{cat:'Checkmates',theme:'mateIn3',title:'Mate in 3',idea:'Three forcing moves in a row. Stay calm and calculate.',ideas:['Checks narrow down the opponent\'s choices.','Keep track of which squares the king can use.','Sacrifices are common here.']},
+{cat:'Checkmates',theme:'anastasiaMate',title:'Anastasia\'s Mate',idea:'Knight + rook (or queen) trap the king on the edge.',ideas:['A knight takes away escape squares (e7 controls g8/g6).','A rook or queen mates on the h-file.','Often starts with a queen sacrifice on h7.']},
+{cat:'Checkmates',theme:'arabianMate',title:'Arabian Mate',idea:'Rook and knight team up in the corner.',ideas:['The knight protects the rook and covers an escape square.','The rook mates next to the king.','One of the oldest mating patterns.']},
+{cat:'Checkmates',theme:'bodenMate',title:'Boden\'s Mate',idea:'Two bishops on crossing diagonals mate the king.',ideas:['Usually against a king castled queenside.','The king\'s own pieces block its escape.','Often begins with a queen sacrifice on c6/c3.']},
+{cat:'Checkmates',theme:'hookMate',title:'Hook Mate',idea:'Rook + knight + pawn form a "hook" around the king.',ideas:['The pawn protects the knight.','The knight protects the rook.','The rook gives mate next to the king.']},
+{cat:'Checkmates',theme:'dovetailMate',title:'Dovetail Mate',idea:'Queen mates diagonally next to the king, its own pieces block the escape.',ideas:['The queen is protected, right beside the king.','The king\'s own pieces sit on the two escape squares behind it.','Also called the Cozio mate.']},
+{cat:'Checkmates',theme:'doubleBishopMate',title:'Two Bishops Mate',idea:'Two bishops slicing neighbouring diagonals.',ideas:['One bishop gives check, the other covers the escape.','Open diagonals toward the king are dangerous.','Look for it when the king\'s pawns are gone.']},
+{cat:'Attack',theme:'attackingF2F7',title:'Attacking f7 / f2',idea:'f7 and f2 are the weakest squares early in the game.',ideas:['Only the king guards them at the start.','Bc4 + Ng5 or Qh5 all aim there.','Sacrifices on f7 rip the king open.']},
+{cat:'Attack',theme:'exposedKing',title:'Hunt the Open King',idea:'A king without pawn cover is a target. Keep checking!',ideas:['Bring more pieces with tempo.','Checks that drive the king forward are the best.','Don\'t let it run back to safety.']},
+{cat:'Attack',theme:'kingsideAttack',title:'Kingside Attack',idea:'Throw pieces at the castled king.',ideas:['Count attackers vs defenders near the king.','Open lines with pawn pushes or sacrifices (h7, g7, f7).','Speed matters more than material.']},
+{cat:'Endgames',theme:'promotion',title:'Promote!',idea:'A new queen wins almost every game.',ideas:['Clear the path for your pawn.','Sacrifice to stop their blockers.','Check that the new queen can\'t be captured right away.']},
+{cat:'Endgames',theme:'advancedPawn',title:'Passed Pawns Must Be Pushed',idea:'A pawn on the 6th or 7th rank is a giant.',ideas:['Defenders get tied up stopping it.','Use it as a decoy while you attack elsewhere.','Support it with your pieces, not just your king.']},
+{cat:'Endgames',theme:'pawnEndgame',title:'Pawn Endgames',idea:'King activity and counting tempi decide everything.',ideas:['Count moves to the queening square.','Opposition: put your king face to face with one square between.','An outside passed pawn is a huge advantage.']},
+{cat:'Endgames',theme:'rookEndgame',title:'Rook Endgames',idea:'Active rooks win. Passive rooks lose.',ideas:['Rook behind passed pawns (yours AND theirs).','Cut off the enemy king.','Use checks from far away.']},
+{cat:'Endgames',theme:'queenEndgame',title:'Queen Endgames',idea:'Checks, forks and skewers everywhere.',ideas:['Look for checks that win the other queen.','Centralise your queen.','Watch out for perpetual check.']},
+{cat:'Endgames',theme:'knightEndgame',title:'Knight Endgames',idea:'Knights are slow: count jumps carefully.',ideas:['Forks are everywhere in knight endings.','A knight has trouble stopping a rook pawn.','Knight endings are like pawn endings: king activity!']},
+{cat:'Endgames',theme:'zugzwang',title:'Zugzwang',idea:'Sometimes the best move is to make your opponent move.',ideas:['Zugzwang: every move they have makes things worse.','Very common in king-and-pawn endings.','Look for a quiet waiting move that keeps everything covered.']},
+{cat:'Endgames',theme:'bishopEndgame',title:'Bishop Endgames',idea:'Use the colour of your bishop.',ideas:['Put pawns on the opposite colour of your bishop.','Opposite-colour bishops are often drawn.','A bishop can stop a pawn from far away.']},
+{cat:'Special Moves',theme:'enPassant',title:'En Passant',idea:'A pawn that jumps two squares can be taken as if it moved one.',ideas:['Only right after the two-square jump.','Your pawn must be on the 5th rank (4th for Black).','Often the only winning move in a puzzle!']},
+{cat:'Special Moves',theme:'underPromotion',title:'Underpromotion',idea:'Sometimes a knight (or rook) is better than a queen.',ideas:['A knight promotion can give check or fork.','A queen can sometimes cause stalemate.','Always ask: which piece is best HERE?']}
+];
+
+const THEME_OF={o1:'opening',o2:'opening',o3:'attackingF2F7',o4:'opening',m1:'middlegame',m2:'middlegame',t1:'fork',t2:'pin',t3:'skewer',t4:'discoveredAttack',t5:'backRankMate',t6:'smotheredMate',e1:'pawnEndgame',e2:'pawnEndgame',e3:'rookEndgame',e4:'queenEndgame',h1:'hangingPiece'};
+LESSONS.forEach(l=>l.theme=THEME_OF[l.id]);
+OPENINGS2.forEach(l=>l.theme='opening');
+LESSONS.splice(4,0,...OPENINGS2);
+const PZ=window.PUZZLES||{};
+const sideName=c=>c==='w'?'White':'Black';
+function pzPrompt(p){const c=parseFEN(p.fen).turn;const m=(p.th||[]).find(t=>/^mateIn\d/.test(t));return `${sideName(c)} to move. `+(m?`Mate in ${m.slice(6)}.`:'Find the best move.');}
+function pzSteps(p){return p.sol.map((u,k)=>[u,k===0?'<b>The key move!</b>'+(p.sol.length===1?' That\'s it.':''):k===p.sol.length-1?'<b>And that finishes it.</b>':k%2?'Best reply.':'Keep going!']);}
+THEME_LESSONS.forEach(t=>{const list=PZ[t.theme]||[];if(list.length<2)return;const d=list[0],q=list[1];
+  LESSONS.push({id:'x'+t.theme,cat:t.cat,title:t.title,idea:t.idea,ideas:t.ideas,theme:t.theme,fen:d.fen,steps:pzSteps(d),flip:parseFEN(d.fen).turn==='b',
+    quiz:{fen:q.fen,solution:q.sol,prompt:pzPrompt(q),hint:t.idea,lm:q.lm},lm:d.lm,used:[d.id,q.id]});});
+const CAT_ORDER=['Openings','Middlegame','Tactics','Checkmates','Attack','Endgames','Special Moves','Thinking Habits'];
+const THEME_INFO={opening:{title:'Opening Tricks',idea:'Development, center and early traps.'},middlegame:{title:'Middlegame Tactics',idea:'Look for checks, captures and threats.'}};
+THEME_LESSONS.forEach(l=>{THEME_INFO[l.theme]={title:l.title,idea:l.idea};});
+LESSONS.forEach(l=>{if(l.theme&&!THEME_INFO[l.theme])THEME_INFO[l.theme]={title:l.title,idea:l.idea};});
+function practicePool(theme,exclude=[]){return (PZ[theme]||[]).filter(p=>!exclude.includes(p.id)).map(p=>itemFromPuzzle(p,theme));}
+function itemFromPuzzle(p,theme){const t=THEME_INFO[theme]||{title:theme,idea:'Checks, captures, threats!'};return{fen:p.fen,sol:p.sol,id:p.id,lm:p.lm,prompt:pzPrompt(p),hint:t.idea,label:t.title,rating:p.r};}
+const lmObj=u=>u?{from:sqIdx(u.slice(0,2)),to:sqIdx(u.slice(2,4))}:null;
+const ALL_PUZZLES=(()=>{const seen={},out=[];for(const th of Object.keys(PZ))for(const p of PZ[th])if(!seen[p.id]){seen[p.id]=1;out.push(itemFromPuzzle(p,th));}return out;})();
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+
+/* ===================== STATE ===================== */
+const LS='iansChessPlaybook.v1';
+const save=JSON.parse(localStorage.getItem(LS)||'{"done":{},"xp":0,"best":0}');
+save.solved=save.solved||{};
+const persist=()=>{localStorage.setItem(LS,JSON.stringify(save));renderStats();};
+const $=id=>document.getElementById(id);
+let cur=null, pos=null, base=null, history=[], stepIdx=0, playing=null, flipped=false;
+let mode='watch', selected=null, lastMove=null, highlights=[], quiz=null, qPly=0, qBusy=false, qMistakes=0;
+let explore=false;
+
+function renderStats(){$('stLessons').textContent=Object.keys(save.done).length;$('stXP').textContent=save.xp;$('stBest').textContent=save.best;}
+
+/* ---------- board ---------- */
+const GLYPH={k:'♚',q:'♛',r:'♜',b:'♝',n:'♞',p:'♟'};
+function drawBoard(){
+  const el=$('board');el.innerHTML='';
+  const chk=status(pos)==='check'||status(pos)==='mate'?kingSq(pos,pos.turn):-1;
+  const targets=selected!=null?genMoves(pos).filter(m=>m.from===selected).map(m=>m.to):[];
+  for(let v=0;v<64;v++){
+    const i=flipped?63-v:v,r=i>>3,f=i&7;
+    const d=document.createElement('div');
+    d.className='sq '+((r+f)%2?'d':'l');
+    if(lastMove&&(i===lastMove.from||i===lastMove.to))d.classList.add('last');
+    if(highlights.includes(i))d.classList.add('hl');
+    if(i===selected)d.classList.add('sel');
+    if(targets.includes(i))d.classList.add('tgt');
+    if(i===chk)d.classList.add('check');
+    const pc=pos.board[i];
+    if(pc){const s=document.createElement('span');s.className='pc '+colorOf(pc);s.textContent=GLYPH[pc.toLowerCase()]+'\uFE0E';d.appendChild(s);}
+    if((v>>3)===7){const c=document.createElement('span');c.className='coord f';c.textContent=FILES[f];d.appendChild(c);}
+    if((v&7)===0){const c=document.createElement('span');c.className='coord r';c.textContent=8-r;d.appendChild(c);}
+    d.onclick=()=>onSquare(i);
+    el.appendChild(d);
+  }
+}
+function banner(t,ms=900){const b=$('banner');b.textContent=t;b.classList.add('show');clearTimeout(b._t);b._t=setTimeout(()=>b.classList.remove('show'),ms);}
+function shake(){const b=$('board');b.classList.remove('shake');void b.offsetWidth;b.classList.add('shake');}
+
+function askPromo(color){
+  return new Promise(res=>{
+    const w=document.createElement('div');w.className='promo';
+    for(const t of 'qrbn'){const b=document.createElement('button');b.textContent=GLYPH[t];b.style.color=color==='w'?'#fff':'#111';b.style.textShadow=color==='w'?'0 0 2px #000':'none';b.onclick=()=>{w.remove();res(t);};w.appendChild(b);}
+    $('boardwrap').appendChild(w);
+  });
+}
+
+async function onSquare(i){
+  if(qBusy)return;
+  const pc=pos.board[i];
+  if(selected!=null){
+    const cands=genMoves(pos).filter(m=>m.from===selected&&m.to===i);
+    if(cands.length){
+      let m=cands[0];
+      if(cands.length>1){const pr=await askPromo(pos.turn);m=cands.find(c=>c.promo===pr);}
+      selected=null;userMove(m);return;
+    }
+  }
+  if(pc&&colorOf(pc)===pos.turn&&(mode!=='quiz'&&mode!=='speed'||colorOf(pc)===quiz.side)){selected=i;}
+  else selected=null;
+  drawBoard();
+}
+
+/* ---------- navigation ---------- */
+function show(view){$('home').classList.toggle('hidden',view!=='home');$('lessonView').classList.toggle('hidden',view==='home');window.scrollTo(0,0);}
+function renderHome(){
+  stopPlay();stopSpeed();show('home');
+  const cats=CAT_ORDER.filter(c=>LESSONS.some(l=>l.cat===c));
+  const nPr=l=>practicePool(l.theme,l.used||[]).length;
+  $('catalog').innerHTML=cats.map(c=>`<div class="cat">${c}</div><div class="grid">`+
+    LESSONS.filter(l=>l.cat===c).map(l=>`<div class="card" data-id="${l.id}"><h3>${l.title}</h3><p>${l.idea}</p><div class="meta"><span>${l.steps.length} moves · ${1+nPr(l)} puzzles</span>${save.done[l.id]?'<span class="done">✓ done</span>':''}</div></div>`).join('')+'</div>').join('')+
+    `<div class="cat" id="gym">🏋️ Puzzle Gym</div><p class="small" style="margin-top:0">Real puzzles from real games (Lichess puzzle database). Pick a theme.</p><div class="grid">`+
+    Object.keys(PZ).filter(t=>PZ[t].length>=3).map(t=>{const info=THEME_INFO[t]||{title:t};const s=PZ[t].filter(p=>save.solved[p.id]).length;
+      return `<div class="card gymcard" data-theme="${t}"><h3>${info.title}</h3><div class="meta"><span>${PZ[t].length} puzzles</span><span class="${s?'done':''}">${s} solved</span></div></div>`;}).join('')+'</div>';
+  document.querySelectorAll('.card[data-id]').forEach(c=>c.onclick=()=>openLesson(c.dataset.id));
+  document.querySelectorAll('.gymcard').forEach(c=>c.onclick=()=>{const t=c.dataset.theme;startDrill((THEME_INFO[t]||{title:t}).title,shuffle(practicePool(t)),false);});
+  const totalPz=ALL_PUZZLES.length+LESSONS.length;
+  $('countLine').textContent=`${LESSONS.length} lessons · ${totalPz} puzzles · ${Object.keys(save.solved).length} solved so far`;
+  const next=LESSONS.find(l=>!save.done[l.id]);
+  $('btnNext').textContent=next?`▶ Continue: ${next.title}`:'▶ Review: '+LESSONS[0].title;
+  $('btnNext').onclick=()=>openLesson((next||LESSONS[0]).id);
+}
+
+/* ---------- WATCH mode ---------- */
+function openLesson(id){
+  stopSpeed();cur=LESSONS.find(l=>l.id===id);show('lesson');
+  $('lTag').textContent=cur.cat;$('lTitle').textContent=cur.title;$('lIdea').textContent=cur.idea;
+  $('lIdeas').innerHTML=cur.ideas.map(x=>`<li>${x}</li>`).join('');
+  $('lIdea').classList.remove('hidden');
+  const np=cur.theme?practicePool(cur.theme,cur.used||[]).length:0;
+  $('bPractice').textContent=`🏋️ Practice (${np})`;$('bPractice').classList.toggle('hidden',!np);
+  $('bPractice2').textContent=`🏋️ Practice more (${np})`;$('bPractice2').dataset.n=np;
+  setMode('watch');restart();
+  setTimeout(()=>{if(mode==='watch'&&stepIdx===0)togglePlay();},700);
+}
+function setMode(m){
+  mode=m;$('watchBox').classList.toggle('hidden',m!=='watch');$('quizBox').classList.toggle('hidden',m!=='quiz');$('speedBox').classList.toggle('hidden',m!=='speed');
+  $('bHome').parentElement.classList.toggle('hidden',m==='speed');
+}
+function restart(){
+  stopPlay();explore=false;base=parseFEN(cur.fen);pos=base;history=[base];stepIdx=0;lastMove=lmObj(cur.lm);selected=null;
+  highlights=(cur.hl||[]).map(sqIdx);flipped=!!cur.flip;
+  $('caption').innerHTML=`<b>Big idea:</b> ${cur.idea}`;renderWatch();
+}
+function goStep(n){
+  explore=false;n=Math.max(0,Math.min(cur.steps.length,n));
+  let p=parseFEN(cur.fen);history=[p];lastMove=lmObj(cur.lm);
+  for(let k=0;k<n;k++){const m=findMove(p,cur.steps[k][0]);lastMove=m;p=makeMove(p,m);history.push(p);}
+  pos=p;stepIdx=n;selected=null;
+  if(n===0)$('caption').innerHTML=`<b>Big idea:</b> ${cur.idea}`;
+  else{const [u,c]=cur.steps[n-1];const san=toSAN(history[n-1],findMove(history[n-1],u));$('caption').innerHTML=`<b>${moveNum(history[n-1])}${san}</b> ${c||''}`;}
+  renderWatch();
+}
+function moveNum(p){return p.turn==='w'?p.full+'. ':p.full+'... ';}
+function renderWatch(){
+  drawBoard();
+  $('prog').style.width=(cur.steps.length?stepIdx/cur.steps.length*100:100)+'%';
+  let p=parseFEN(cur.fen),out=[];
+  cur.steps.forEach(([u],k)=>{const m=findMove(p,u);const san=(p.turn==='w'||k===0?moveNum(p):'')+toSAN(p,m);out.push(`<span class="${k===stepIdx-1?'cur':''}">${san}</span>`);p=makeMove(p,m);});
+  $('moveList').innerHTML=out.join(' ');
+  $('bPlay').textContent=playing?'❚❚ Pause':'▶ Play';
+}
+function togglePlay(){
+  if(playing){stopPlay();renderWatch();return;}
+  if(stepIdx>=cur.steps.length)goStep(0);
+  playing=setInterval(()=>{if(stepIdx>=cur.steps.length){stopPlay();renderWatch();$('bTry').classList.add('pulse');return;}goStep(stepIdx+1);},+$('speedSel').value);
+  renderWatch();
+}
+function stopPlay(){if(playing){clearInterval(playing);playing=null;}}
+
+/* ---------- QUIZ mode ---------- */
+function quizStart(p){let q=Object.assign({},p);return q;}
+function startQuiz(){
+  stopPlay();setMode('quiz');
+  const q=cur.quiz;let p;
+  if(q.fen)p=parseFEN(q.fen);else{p=parseFEN(cur.fen);for(let k=0;k<q.fromStep;k++)p=makeMove(p,findMove(p,cur.steps[k][0]));}
+  quiz=Object.assign({},q,{start:p,side:p.turn});
+  resetQuiz();
+}
+function resetQuiz(){
+  pos=quiz.start;qPly=0;qBusy=false;qMistakes=0;lastMove=lmObj(quiz.lm);selected=null;highlights=[];
+  flipped=quiz.side==='b';
+  $('qPrompt').innerHTML='🎯 '+quiz.prompt;$('qFeedback').textContent='';$('qFeedback').className='feedback';
+  $('bNextLesson').classList.add('hidden');$('bPractice2').classList.add('hidden');drawBoard();
+}
+function userMove(m){
+  if(mode==='watch'){ // free exploration
+    explore=true;lastMove=m;pos=makeMove(pos,m);highlights=[];
+    const st=status(pos);$('caption').innerHTML=`🧪 <b>Exploring:</b> you played ${toSAN(makeMoveUndoHack(m),m)}${st==='mate'?' Checkmate!':st==='stalemate'?' Stalemate!':''} <span class="small">(↺ to go back)</span>`;
+    drawBoard();return;
+  }
+  if(mode==='quiz'||mode==='speed')return quizMove(m);
+}
+let _prevForSan=null;
+function makeMoveUndoHack(m){return _prevForSan;}
+const _origUser=userMove;
+function quizMove(m){
+  const fb=mode==='speed'?$('spFeedback'):$('qFeedback');
+  const full=uciOf(m),u=full.slice(0,4);
+  const want=quiz.solution[qPly];
+  const after=makeMove(pos,m);
+  const good=full===want||u===want||(qPly===0&&(quiz.alt||[]).includes(u))||status(after)==='mate';
+  if(!good){qMistakes++;fb.textContent='Not this one. Try again!';fb.className='feedback no';shake();selected=null;drawBoard();if(mode==='speed')speedWrong();return;}
+  lastMove=m;pos=after;qPly++;drawBoard();
+  const finished=qPly>=quiz.solution.length||status(pos)==='mate'||(qPly===1&&(quiz.alt||[]).includes(u));
+  if(finished){return quizSolved(fb);}
+  fb.textContent='Good! Keep going...';fb.className='feedback ok';
+  qBusy=true;
+  setTimeout(()=>{const om=findMove(pos,quiz.solution[qPly]);lastMove=om;pos=makeMove(pos,om);qPly++;qBusy=false;drawBoard();},550);
+}
+function quizSolved(fb){
+  qBusy=true;
+  const msgs=['Nailed it!','Clean!','Grandmaster move!','Boom!','Too easy for you.'];
+  banner(status(pos)==='mate'?'Checkmate! ♛':msgs[Math.floor(Math.random()*msgs.length)]);
+  fb.textContent='✓ Solved!'+(qMistakes?'':' First try!');fb.className='feedback ok';
+  if(mode==='speed')return speedRight();
+  save.xp+=qMistakes?5:10;save.done[cur.id]=true;persist();
+  $('bNextLesson').classList.remove('hidden');
+  if(+$('bPractice2').dataset.n)$('bPractice2').classList.remove('hidden');
+}
+function showAnswer(){
+  if(qBusy)return;qBusy=true;let i=qPly;
+  const fbA=mode==='speed'?$('spFeedback'):$('qFeedback');
+  if(mode==='speed'){clearInterval(sp.tick);sp.streak=0;$('spStreak').textContent=0;}
+  const stepper=()=>{if(i>=quiz.solution.length){fbA.textContent=mode==='speed'?'That\'s the answer. Press Next ▶':'That\'s the idea. Press Retry and play it yourself.';fbA.className='feedback';return;}
+    const m=findMove(pos,quiz.solution[i]);lastMove=m;pos=makeMove(pos,m);i++;drawBoard();setTimeout(stepper,700);};
+  stepper();
+}
+
+/* ---------- DRILLS (Speed Drill + Puzzle Gym + Practice) ---------- */
+let sp=null;
+function startSpeed(){startDrill('⚡ Speed Drill',shuffle(ALL_PUZZLES).slice(0,20),true);}
+function startDrill(title,items,timed){
+  stopPlay();stopSpeed();cur={id:'drill',cat:'Drill',title,idea:'',ideas:[],fen:START,steps:[]};
+  show('lesson');$('lTag').textContent=timed?'Speed Drill':'Puzzle Gym';$('lTitle').textContent=title;
+  $('lIdea').textContent=timed?'30 seconds per puzzle. Keep the streak alive!':'Real puzzles from real games. Solve them one by one.';
+  setMode('speed');
+  sp={items,i:0,streak:0,solved:0,timed};$('spStreak').textContent=0;
+  $('spTimerWrap').classList.toggle('hidden',!timed);$('spHint').classList.toggle('hidden',timed);
+  nextSpeed();
+}
+function nextSpeed(){
+  clearInterval(sp.tick);
+  if(sp.i>=sp.items.length){$('spCount').textContent='';$('spPrompt').innerHTML=`🏁 Done! Solved <b>${sp.solved}</b> / ${sp.items.length}.`+(sp.timed?` Best streak ever: ${save.best}`:'');$('spFeedback').textContent='';qBusy=true;return;}
+  const it=sp.items[sp.i];const p=parseFEN(it.fen);
+  quiz={solution:it.sol,start:p,side:p.turn,hint:it.hint,id:it.id};
+  pos=p;qPly=0;qBusy=false;qMistakes=0;lastMove=lmObj(it.lm);selected=null;highlights=[];flipped=p.turn==='b';
+  $('spCount').textContent=`Puzzle ${sp.i+1}/${sp.items.length}`+(it.label?` · ${it.label}`:'')+(it.rating?` · ★${it.rating}`:'');
+  $('spPrompt').innerHTML='🎯 '+it.prompt;$('spFeedback').textContent='';$('spFeedback').className='feedback';drawBoard();
+  if(!sp.timed)return;
+  sp.left=30;$('spTimer').style.width='100%';$('spTimer').style.background='var(--good)';
+  sp.tick=setInterval(()=>{sp.left-=0.1;$('spTimer').style.width=Math.max(0,sp.left/30*100)+'%';if(sp.left<10)$('spTimer').style.background='var(--bad)';
+    if(sp.left<=0){clearInterval(sp.tick);sp.streak=0;$('spStreak').textContent=0;$('spFeedback').textContent='⏰ Time! Tip: '+it.hint;$('spFeedback').className='feedback no';qBusy=true;setTimeout(()=>{sp.i++;nextSpeed();},2200);}},100);
+}
+function speedWrong(){sp.streak=0;$('spStreak').textContent=0;}
+function speedRight(){
+  clearInterval(sp.tick);sp.solved++;if(!qMistakes){sp.streak++;}
+  save.xp+=qMistakes?3:(sp.timed&&sp.left>20?15:10);if(quiz.id)save.solved[quiz.id]=1;
+  if(sp.streak>save.best)save.best=sp.streak;persist();$('spStreak').textContent=sp.streak;
+  setTimeout(()=>{sp.i++;nextSpeed();},1100);
+}
+function stopSpeed(){if(sp){clearInterval(sp.tick);}}
+/* ---------- wire up ---------- */
+$('logo').onclick=renderHome;$('bHome').onclick=renderHome;
+$('btnSpeed').onclick=startSpeed;
+$('bPlay').onclick=togglePlay;
+$('bPrev').onclick=()=>{stopPlay();goStep(stepIdx-1);};
+$('bNext').onclick=()=>{stopPlay();goStep(stepIdx+1);};
+$('bRestart').onclick=restart;
+$('bFlip').onclick=()=>{flipped=!flipped;drawBoard();};
+$('bTry').onclick=startQuiz;
+$('bHint').onclick=()=>{$('qFeedback').textContent='💡 '+quiz.hint;$('qFeedback').className='feedback';};
+$('bShow').onclick=showAnswer;
+$('bRetry').onclick=resetQuiz;
+$('bBackWatch').onclick=()=>{setMode('watch');restart();};
+$('bNextLesson').onclick=()=>{const i=LESSONS.indexOf(cur);openLesson(LESSONS[(i+1)%LESSONS.length].id);};
+$('spSkip').onclick=()=>{clearInterval(sp.tick);sp.streak=0;$('spStreak').textContent=0;sp.i++;nextSpeed();};
+$('spQuit').onclick=renderHome;
+$('btnGym').onclick=()=>{document.getElementById('gym').scrollIntoView({behavior:'smooth'});};
+$('bPractice').onclick=()=>startDrill(cur.title+' · Practice',shuffle(practicePool(cur.theme,cur.used||[])),false);
+$('bPractice2').onclick=()=>$('bPractice').onclick();
+$('spHint').onclick=()=>{$('spFeedback').textContent='💡 '+quiz.hint;$('spFeedback').className='feedback';};
+$('spShow').onclick=showAnswer;
+$('speedSel').onchange=()=>{if(playing){stopPlay();togglePlay();}};
+
+/* keep the SAN for explore mode correct */
+const _userMove=userMove;
+userMove=function(m){_prevForSan=pos;return _userMove(m);};
+
+/* self-check used during development */
+window.__validate=function(){
+  const errs=[];
+  for(const l of LESSONS){
+    try{
+      let p=parseFEN(l.fen);
+      l.steps.forEach(([u],k)=>{const m=findMove(p,u);if(!m)throw new Error(`step ${k+1} ${u} illegal`);p=makeMove(p,m);});
+      if(l.steps.length&&/#|checkmate/i.test(l.steps[l.steps.length-1][1]||'')&&status(p)!=='mate')errs.push(l.id+': final step not mate');
+      const q=l.quiz;let qp;
+      if(q.fen)qp=parseFEN(q.fen);else{qp=parseFEN(l.fen);for(let k=0;k<q.fromStep;k++)qp=makeMove(qp,findMove(qp,l.steps[k][0]));}
+      if(status(qp)==='mate')throw new Error('quiz start already mate');
+      (q.alt||[]).forEach(a=>{if(!findMove(qp,a))throw new Error('alt illegal '+a);});
+      q.solution.forEach((u,k)=>{const m=findMove(qp,u);if(!m)throw new Error(`quiz move ${k+1} ${u} illegal`);qp=makeMove(qp,m);});
+      if((q.anyMate||/mate/i.test(q.prompt))&&status(qp)!=='mate')errs.push(l.id+': quiz should end in mate but is '+status(qp));
+    }catch(e){errs.push(l.id+': '+e.message);}
+  }
+  return errs;
+};
+
+renderStats();renderHome();
+</script>
+</body>
+</html>
